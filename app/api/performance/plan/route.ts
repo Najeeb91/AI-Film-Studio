@@ -1,0 +1,4 @@
+import { NextResponse } from 'next/server'
+import { buildPerformancePlan, performancePrompt } from '@/lib/performance'
+export async function POST(req:Request){
+  try{const b=await req.json();const plan=b.plan;const ci=Number(b.chapterIndex),si=Number(b.sceneIndex),shi=Number(b.shotIndex);if(!plan)return NextResponse.json({error:'Project plan is required.'},{status:400});const p=buildPerformancePlan(plan,ci,si,shi);if(Array.isArray(b.dialogue)){p.dialogue=b.dialogue.map((d:any,i:number)=>({...p.dialogue?.[i],...d,id:d.id||`dialogue-${plan.chapters[ci].scenes[si].shots[shi].id}-${i+1}`,createdAt:d.createdAt||new Date().toISOString(),lipSyncStatus:d.lipSyncStatus||'planned'}))}return NextResponse.json({performance:p,prompt:performancePrompt(plan,ci,si,shi,p)})}catch(e:any){return NextResponse.json({error:e?.message||'Unable to build performance plan.'},{status:500})}}

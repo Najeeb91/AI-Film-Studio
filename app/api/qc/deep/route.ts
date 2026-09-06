@@ -1,0 +1,3 @@
+import {NextResponse} from 'next/server'
+import {runDeepVisualQC} from '@/lib/visual-qc'
+export async function POST(req:Request){try{const body=await req.json();if(!body.plan||body.chapterIndex===undefined||body.sceneIndex===undefined||body.shotIndex===undefined)return NextResponse.json({error:'Plan and shot coordinates are required.'},{status:400});const qualityCheck=await runDeepVisualQC({plan:body.plan,chapterIndex:Number(body.chapterIndex),sceneIndex:Number(body.sceneIndex),shotIndex:Number(body.shotIndex),videoUri:body.videoUri});return NextResponse.json({qualityCheck})}catch(e:any){return NextResponse.json({error:e?.message||'Deep visual QC failed.'},{status:500})}}

@@ -1,0 +1,10 @@
+-- AI Film Studio V27 production baseline migration.
+CREATE TABLE IF NOT EXISTS film_projects (id text PRIMARY KEY, data jsonb NOT NULL, updated_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS render_jobs (id text PRIMARY KEY, project_id text NOT NULL, status text NOT NULL, progress integer NOT NULL DEFAULT 0, manifest jsonb NOT NULL, output_uri text, error text, created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS media_assets (id text PRIMARY KEY, project_id text, kind text NOT NULL, uri text NOT NULL, mime_type text, size_bytes bigint, metadata jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS production_jobs (id text PRIMARY KEY, project_id text NOT NULL, shot_id text NOT NULL, chapter_index integer NOT NULL, scene_index integer NOT NULL, shot_index integer NOT NULL, status text NOT NULL, priority integer NOT NULL DEFAULT 50, attempts integer NOT NULL DEFAULT 0, operation_name text, provider text, model text, error text, created_at timestamptz NOT NULL DEFAULT now(), started_at timestamptz, completed_at timestamptz, updated_at timestamptz NOT NULL DEFAULT now(), UNIQUE(project_id, shot_id));
+CREATE TABLE IF NOT EXISTS render_chunks (id text PRIMARY KEY, render_job_id text NOT NULL REFERENCES render_jobs(id) ON DELETE CASCADE, chunk_index integer NOT NULL, start_seconds double precision NOT NULL, duration_seconds double precision NOT NULL, status text NOT NULL DEFAULT 'queued', progress integer NOT NULL DEFAULT 0, uri text, error text, updated_at timestamptz NOT NULL DEFAULT now(), UNIQUE(render_job_id, chunk_index));
+CREATE INDEX IF NOT EXISTS idx_render_jobs_project ON render_jobs(project_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_media_assets_project ON media_assets(project_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_production_jobs_project_status ON production_jobs(project_id, status, priority);
+CREATE INDEX IF NOT EXISTS idx_render_chunks_job ON render_chunks(render_job_id, chunk_index);

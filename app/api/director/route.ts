@@ -1,0 +1,3 @@
+import {NextResponse} from 'next/server'
+import {generateDirectorPlan} from '@/lib/director'
+export async function POST(req:Request){try{const body=await req.json(); const prompt=String(body.prompt||'').trim(); if(!prompt)return NextResponse.json({error:'Prompt is required.'},{status:400}); const duration=Math.min(60,Math.max(1,Number(body.durationMinutes)||10)); const genre=String(body.genre||'Cinematic Documentary'); const plan=await generateDirectorPlan(prompt,duration,genre); return NextResponse.json({plan,mode:process.env.AI_GATEWAY_API_KEY?'llm':'fallback'})}catch(e:any){return NextResponse.json({error:e?.message||'Director failed.'},{status:500})}}

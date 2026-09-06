@@ -1,0 +1,3 @@
+import { NextResponse } from 'next/server'
+import type { Timeline } from '@/lib/schemas'
+export async function POST(req: Request) { try { const { timeline } = await req.json() as {timeline:Timeline}; if(!timeline) return NextResponse.json({error:'Timeline is required.'},{status:400}); const video=timeline.clips.filter(c=>c.kind==='video'&&!c.muted); const edl=video.map((c,i)=>({edit:i+1,sourceId:c.sourceId,timelineStart:c.start,timelineEnd:c.start+c.duration,sourceIn:c.trimStart,sourceOut:c.trimEnd,transition:c.transition})); return NextResponse.json({edl,duration:timeline.duration,audio:timeline.clips.filter(c=>c.kind!=='video')}) } catch(e:any){return NextResponse.json({error:e?.message||'Unable to prepare edit.'},{status:500})}}

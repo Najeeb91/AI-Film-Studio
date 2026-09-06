@@ -1,0 +1,13 @@
+services:
+  render-worker:
+    build:
+      context: .
+      dockerfile: docker/render-worker.Dockerfile
+    ports:
+      - "8787:8787"
+    environment:
+      NODE_ENV: production
+      PORT: 8787
+      RENDER_WORKER_SECRET: ${RENDER_WORKER_SECRET:?Set RENDER_WORKER_SECRET}
+      RENDER_WORKER_MAX_CONCURRENCY: ${RENDER_WORKER_MAX_CONCURRENCY:-1}
+    restart: unless-stopped

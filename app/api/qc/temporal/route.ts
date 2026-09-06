@@ -1,0 +1,3 @@
+import { NextResponse } from 'next/server'
+import { runTemporalQC } from '@/lib/temporal-qc'
+export async function POST(req:Request){try{const b=await req.json();if(!b.plan||b.chapterIndex===undefined||b.sceneIndex===undefined||b.shotIndex===undefined)return NextResponse.json({error:'Plan and shot coordinates are required.'},{status:400});const q=await runTemporalQC({plan:b.plan,chapterIndex:Number(b.chapterIndex),sceneIndex:Number(b.sceneIndex),shotIndex:Number(b.shotIndex),videoUri:b.videoUri});return NextResponse.json({qualityCheck:q})}catch(e:any){return NextResponse.json({error:e?.message||'Temporal continuity check failed.'},{status:500})}}
